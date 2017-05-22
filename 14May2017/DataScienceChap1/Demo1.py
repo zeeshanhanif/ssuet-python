@@ -55,3 +55,40 @@ sortedFreindList = sorted(num_friends_by_id, # get it sorted
                         reverse=True)
 
 print(sortedFreindList);
+print("------")
+print([friend["id"] for friend in users[0]["friends"]]) # [1, 2]
+print([friend["id"] for friend in users[1]["friends"]]) # [0, 2, 3]
+print([friend["id"] for friend in users[2]["friends"]]) # [0, 1, 3]
+
+print("------")
+def friends_of_friend_ids_bad(user):
+    # "foaf" is short for "friend of a friend"
+    return [foaf["id"]
+        for friend in user["friends"] # for each of user's friends
+        for foaf in friend["friends"]] # get each of _their_ friends
+
+fofList = friends_of_friend_ids_bad(users[0]);
+print(fofList);
+
+print("++++++++++++++++++")
+
+from collections import Counter # not loaded by default
+def not_the_same(user, other_user):
+    """two users are not the same if they have different ids"""
+    return user["id"] != other_user["id"]
+
+def not_friends(user, other_user):
+    """other_user is not a friend if he's not in user["friends"];
+    that is, if he's not_the_same as all the people in user["friends"]"""
+    return all(not_the_same(friend, other_user)
+                    for friend in user["friends"])
+
+def friends_of_friend_ids(user):
+    return Counter(foaf["id"]
+            for friend in user["friends"] # for each of my friends
+            for foaf in friend["friends"] # count *their* friends
+            if not_the_same(user, foaf)
+            and not_friends(user, foaf)) # who aren't me
+             # and aren't my friends
+
+print(friends_of_friend_ids(users[3]))
